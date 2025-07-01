@@ -1,0 +1,50 @@
+# Аннануров Даниил 3 курс
+# Атака на короткий открытый текст
+
+with(numtheory):
+with(RandomTools):
+
+# Генерация параметров RSA
+p:= nextprime(Generate(integer(range=3..10^10)));
+q:= nextprime(Generate(integer(range=3..10^10)));
+n:=p*q;
+e:= prevprime(phi(n));
+
+# Генерация короткого сообщения (уязвимость)
+m:=Generate(integer(range=3..10^6));
+c:=m&^e mod n;
+
+# Криптоанализ: атака meet-in-the-middle на короткие сообщения
+i:=1:
+# Массив для хранения зашифрованных значений c/i^e
+U:= Array([c]);
+# Массив для хранения значений i^e
+V:= Array([1]);
+
+# Предвычисление значений i^e для всех i от 1 до 10^5
+while i <= 10^5 do
+i:=i+1:
+V(i):=i&^e mod n;
+end do:
+V:=convert(V, list):
+
+# Поиск пересечения множеств U и V
+i:=1:
+while not evalb(U(i) in V) and i <= 10^5 do
+i:=i+1;
+U(i):=c*(i&^(-e)) mod n;		# вычисление c/i^e
+end do:
+'i' = i;
+
+# Поиск соответствующего индекса j в массиве V
+j:=1:
+while V[j] <> U[i] do
+j:=j+1;
+end do:
+'j' = j;
+
+# Восстановление исходного сообщения m = i*j
+m2:= i*j;
+
+# Проверка корректности восстановления
+m2-m;
